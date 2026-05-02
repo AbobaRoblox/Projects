@@ -35,7 +35,9 @@ for (let offset = 0, index = 0; offset < appScript.length; offset += chunkSize, 
 unlinkSync(appScriptPath);
 
 const loader = `<script type="module">
-const appChunks = ${JSON.stringify(chunkUrls)};
+const appChunks = ${JSON.stringify(chunkUrls)}.map((chunkUrl) =>
+  new URL(chunkUrl, window.location.href).href
+);
 const parallelLoads = 4;
 const maxAttempts = 4;
 
