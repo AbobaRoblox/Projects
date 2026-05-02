@@ -47,30 +47,34 @@ function showLoadError(error) {
   root.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#0b0d0c;color:#f3e7d0;font:16px/1.5 system-ui,sans-serif;padding:24px"><div style="max-width:520px;border:1px solid rgba(222,135,61,.35);background:rgba(21,23,22,.94);padding:22px;border-radius:14px;box-shadow:0 20px 80px rgba(0,0,0,.35)"><strong style="display:block;color:#f59e0b;font-size:20px;margin-bottom:8px">RustLex не загрузился до конца</strong><span>Netlify оборвал один из маленьких файлов. Обнови страницу: загрузчик повторит скачивание.</span></div></div>';
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
-  const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
-
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function requestChunk(url) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", url);
+    request.responseType = "arraybuffer";
+    request.timeout = 12000;
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300 && request.response) {
+        resolve(new Uint8Array(request.response));
+        return;
+      }
+
+      reject(new Error("Chunk request failed: " + request.status));
+    };
+    request.onerror = () => reject(new Error("Chunk network error"));
+    request.ontimeout = () => reject(new Error("Chunk request timeout"));
+    request.send();
+  });
 }
 
 async function fetchChunk(url) {
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const response = await fetchWithTimeout(url, { cache: "no-store" });
-
-      if (!response.ok) {
-        throw new Error("Chunk request failed: " + response.status);
-      }
-
-      return new Uint8Array(await response.arrayBuffer());
+      return await requestChunk(url);
     } catch (error) {
       if (attempt === maxAttempts) {
         throw error;
