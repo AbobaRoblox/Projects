@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #080909;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(197, 107, 50, 0.2), transparent 34rem),
+    radial-gradient(circle at 82% 2%, rgba(127, 159, 98, 0.12), transparent 28rem),
+    radial-gradient(circle at 50% 110%, rgba(229, 161, 71, 0.1), transparent 28rem),
+    #080909;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(229, 161, 71, 0.35);
+  color: #fff;
+}
+
+.noise-layer {
+  z-index: 0;
+  opacity: 0.12;
+  background-image:
+    repeating-radial-gradient(circle at 15% 30%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 7px);
+  mix-blend-mode: overlay;
+}
+
+.rust-hero-bg {
+  background:
+    linear-gradient(115deg, rgba(8, 9, 9, 0.92), rgba(14, 17, 15, 0.8) 42%, rgba(46, 27, 17, 0.5)),
+    radial-gradient(circle at 72% 34%, rgba(197, 107, 50, 0.22), transparent 28rem),
+    radial-gradient(circle at 35% 80%, rgba(229, 161, 71, 0.13), transparent 24rem);
+}
+
+.subtle-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.metal-stripes {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 7px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(229, 161, 71, 0.28), transparent 34%),
+    linear-gradient(315deg, rgba(127, 159, 98, 0.16), transparent 34%);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+@layer components {
+  .primary-button {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-md border border-rust-amber/40 bg-rust-amber px-5 text-sm font-black uppercase tracking-[0.12em] text-black shadow-ember transition hover:-translate-y-0.5 hover:bg-[#f0ad52] focus:outline-none focus:ring-2 focus:ring-rust-amber/40;
+  }
+
+  .secondary-button {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.055] px-5 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:border-rust-amber/40 hover:bg-rust-amber/10 focus:outline-none focus:ring-2 focus:ring-rust-amber/20;
+  }
+
+  .nav-chip {
+    @apply inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-rust-metal transition hover:bg-rust-amber/10 hover:text-white;
+  }
+
+  .view-toggle {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded px-4 text-sm font-black text-rust-metal transition hover:text-white;
+  }
+
+  .view-toggle-active {
+    @apply bg-rust-amber text-black shadow-ember hover:text-black;
+  }
+
+  .query-pill {
+    @apply inline-flex items-center rounded-md border border-white/10 bg-white/[0.045] px-3 py-2 text-sm font-bold text-rust-metal transition hover:border-rust-amber/40 hover:bg-rust-amber/10 hover:text-white;
+  }
+
+  .section-kicker {
+    @apply text-xs font-black uppercase tracking-[0.24em] text-rust-amber;
+  }
+
+  .section-title {
+    @apply mt-2 max-w-4xl text-3xl font-black leading-tight text-white sm:text-4xl;
+  }
+
+  .item-icon {
+    @apply grid h-12 w-12 shrink-0 place-items-center rounded-md border border-rust-amber/25 bg-gradient-to-br from-rust-amber/10 to-black/20 text-rust-amber shadow-ember;
+  }
+
+  .icon-button {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-md border border-white/10 bg-white/[0.035] text-rust-metal transition hover:border-rust-amber/40 hover:bg-rust-amber/10 hover:text-rust-amber;
+  }
+
+  .icon-button-active {
+    @apply border-rust-amber/40 bg-rust-amber/10 text-rust-amber;
+  }
+
+  .copy-button {
+    @apply inline-flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm font-bold text-rust-metal transition hover:border-rust-amber/40 hover:text-white;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded border border-white/10 bg-white/[0.045] px-2 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-rust-metal;
+  }
+
+  .badge-amber {
+    @apply border-rust-amber/30 bg-rust-amber/10 text-rust-amber;
+  }
+
+  .badge-green {
+    @apply border-rust-green/30 bg-rust-green/10 text-rust-green;
+  }
+
+  .badge-red {
+    @apply border-red-400/30 bg-red-500/10 text-red-300;
+  }
+
+  .badge-muted {
+    @apply bg-black/20 text-rust-metal;
+  }
+
+  .resource-chip {
+    @apply inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-rust-metal;
+  }
+
+  .resource-chip b {
+    @apply rounded bg-rust-amber/10 px-2 py-0.5 text-rust-amber;
+  }
+
+  .faq-card {
+    @apply rounded-lg border border-white/10 bg-rust-panel/70 p-5 shadow-rust transition hover:border-rust-amber/25;
+  }
+
+  .footer-title {
+    @apply text-xs font-black uppercase tracking-[0.22em] text-rust-amber;
+  }
+
+  .footer-link {
+    @apply inline-flex items-center gap-2 transition hover:text-white;
+  }
+}
+
+.scrollbar-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(229, 161, 71, 0.45) rgba(255, 255, 255, 0.05);
+}
+
+.scrollbar-soft::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-soft::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.scrollbar-soft::-webkit-scrollbar-thumb {
+  background: rgba(229, 161, 71, 0.45);
+  border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+}
