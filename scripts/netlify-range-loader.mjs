@@ -4,7 +4,7 @@ import { basename, extname, join } from "node:path";
 const distDir = join(process.cwd(), "dist");
 const indexPath = join(distDir, "index.html");
 const html = readFileSync(indexPath, "utf8");
-const chunkSize = 6000;
+const chunkSize = 12000;
 
 const moduleScriptPattern =
   /<script type="module" crossorigin src="([^"]+)"><\/script>/;
@@ -42,6 +42,7 @@ const loader = `<script type="module">
 const appChunks = ${JSON.stringify(chunkUrls)}.map((chunkUrl) =>
   new URL(chunkUrl, window.location.href).href
 );
+const parallelLoads = 6;
 const maxAttempts = 5;
 
 function showLoadError(error) {
@@ -104,8 +105,11 @@ async function fetchChunk(url) {
 async function importAppScript() {
   const parts = [];
 
-  for (const chunkUrl of appChunks) {
-    parts.push(await fetchChunk(chunkUrl));
+  for (let index = 0; index < appChunks.length; index += parallelLoads) {
+    const batch = appChunks
+      .slice(index, index + parallelLoads)
+      .map((chunkUrl) => fetchChunk(chunkUrl));
+    parts.push(...(await Promise.all(batch)));
   }
 
   const blob = new Blob(parts, { type: "text/javascript" });
