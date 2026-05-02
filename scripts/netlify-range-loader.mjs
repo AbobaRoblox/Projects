@@ -4,7 +4,7 @@ import { basename, extname, join } from "node:path";
 const distDir = join(process.cwd(), "dist");
 const indexPath = join(distDir, "index.html");
 const html = readFileSync(indexPath, "utf8");
-const chunkSize = 8000;
+const chunkSize = 6000;
 
 const moduleScriptPattern =
   /<script type="module" crossorigin src="([^"]+)"><\/script>/;
@@ -28,7 +28,11 @@ for (let offset = 0, index = 0; offset < appScript.length; offset += chunkSize, 
   const chunkUrl = appScriptSrc.replace(/[^/]+$/, chunkName);
   const chunkPath = join(distDir, ...chunkUrl.replace(/^\//, "").split("/"));
 
-  writeFileSync(chunkPath, appScript.subarray(offset, offset + chunkSize));
+  writeFileSync(
+    chunkPath,
+    appScript.subarray(offset, offset + chunkSize).toString("base64"),
+    "utf8",
+  );
   chunkUrls.push(chunkUrl);
 }
 
@@ -55,11 +59,10 @@ function requestChunk(url) {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("GET", url);
-    request.responseType = "arraybuffer";
     request.timeout = 12000;
     request.onload = () => {
-      if (request.status >= 200 && request.status < 300 && request.response) {
-        resolve(new Uint8Array(request.response));
+      if (request.status >= 200 && request.status < 300 && request.responseText) {
+        resolve(decodeBase64Chunk(request.responseText.trim()));
         return;
       }
 
@@ -69,6 +72,17 @@ function requestChunk(url) {
     request.ontimeout = () => reject(new Error("Chunk request timeout"));
     request.send();
   });
+}
+
+function decodeBase64Chunk(value) {
+  const binary = window.atob(value);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
 }
 
 async function fetchChunk(url) {
