@@ -18,13 +18,13 @@ if (!match) {
 const appScriptSrc = match[1];
 const appScriptPath = join(distDir, ...appScriptSrc.replace(/^\//, "").split("/"));
 const appScript = readFileSync(appScriptPath);
-const extension = extname(appScriptSrc);
-const baseName = basename(appScriptSrc, extension);
+const originalExtension = extname(appScriptSrc);
+const baseName = basename(appScriptSrc, originalExtension);
 const chunkUrls = [];
 
 for (let offset = 0, index = 0; offset < appScript.length; offset += chunkSize, index += 1) {
   const suffix = String(index).padStart(3, "0");
-  const chunkName = `${baseName}.part-${suffix}${extension}`;
+  const chunkName = `${baseName}.part-${suffix}.txt`;
   const chunkUrl = appScriptSrc.replace(/[^/]+$/, chunkName);
   const chunkPath = join(distDir, ...chunkUrl.replace(/^\//, "").split("/"));
 
