@@ -18,8 +18,9 @@ const appScriptSrc = match[1];
 
 const loader = `<script type="module">
 const appScriptSrc = ${JSON.stringify(appScriptSrc)};
-const chunkSize = 16000;
-const parallelLoads = 4;
+const chunkSize = 12000;
+const parallelLoads = 3;
+const maxAttempts = 4;
 
 function showLoadError(error) {
   console.error("[RustLex] App script load failed", error);
@@ -38,35 +39,54 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   }
 }
 
-async function getScriptSize() {
-  const response = await fetchWithTimeout(appScriptSrc, {
-    method: "HEAD",
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("HEAD failed: " + response.status);
-  }
-
-  const length = Number(response.headers.get("content-length"));
-  if (!Number.isFinite(length) || length <= 0) {
-    throw new Error("Missing content-length for app script");
-  }
-
-  return length;
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 async function fetchRange(start, end) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetchWithTimeout(appScriptSrc, {
+        headers: { Range: "bytes=" + start + "-" + end },
+        cache: "no-store",
+      });
+
+      if (response.status !== 206) {
+        throw new Error("Range request failed: " + response.status);
+      }
+
+      return new Uint8Array(await response.arrayBuffer());
+    } catch (error) {
+      if (attempt === maxAttempts) {
+        throw error;
+      }
+
+      await wait(250 * attempt);
+    }
+  }
+
+  throw new Error("Range request failed");
+}
+
+async function getScriptSize() {
   const response = await fetchWithTimeout(appScriptSrc, {
-    headers: { Range: "bytes=" + start + "-" + end },
-    cache: "force-cache",
+    headers: { Range: "bytes=0-0" },
+    cache: "no-store",
   });
 
   if (response.status !== 206) {
-    throw new Error("Range request failed: " + response.status);
+    throw new Error("Initial range request failed: " + response.status);
   }
 
-  return new Uint8Array(await response.arrayBuffer());
+  const contentRange = response.headers.get("content-range") || "";
+  const match = contentRange.match(/\\/([0-9]+)$/);
+  const length = match ? Number(match[1]) : 0;
+
+  if (!Number.isFinite(length) || length <= 0) {
+    throw new Error("Missing content-range size for app script");
+  }
+
+  return length;
 }
 
 async function importAppScript() {
